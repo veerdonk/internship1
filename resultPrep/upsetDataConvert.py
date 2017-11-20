@@ -40,8 +40,8 @@ def parseDndsFile(filename, dndsGeneDict):
 		genes.append(line[0])
 
 	dndsGeneDict[filename] = genes
-
 	file.close()
+
 	return dndsGeneDict
 
 def getRefGeneNames(filename):
@@ -52,6 +52,7 @@ def getRefGeneNames(filename):
 	OUT:
 	set of gene names
 	'''	
+
 	geneNames = set()
 	file = open(filename, "rU")
 	next(file)
@@ -61,6 +62,7 @@ def getRefGeneNames(filename):
 			geneNames.add(line[1].split(" ")[0]) 
 
 	file.close()
+
 	return geneNames
 
 def getKnownGenes(filename):
@@ -99,6 +101,7 @@ def createUpsetData(refGeneNames, knownGeneNames, dndsGeneDict, outfileName):
 	dpp6a	1		1		0
 	zic5	0		1		1
 	'''
+	
 	out = open(outfileName,"w")
 	lineSize = len(dndsGeneDict) + 1 #number of columns (+1 for the known genes)
 	out.write("gene,ageing genes,{}\n".format(dndsGeneDict.keys()))

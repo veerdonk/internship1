@@ -1,5 +1,3 @@
-
-
 setwd("~/Documents/david/scripts/genenames/out")
 pdf("histograms.pdf")
 rodentFiles <- dir("./rodents", full.names = TRUE)

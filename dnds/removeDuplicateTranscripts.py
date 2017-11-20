@@ -30,16 +30,15 @@ def removeDupes(infile, outfile):
 	fasta with only longest transcripts
 	and geneID as record id
 	'''
+	
 	dupes = 0
 	genes = dict()
 	records = list(SeqIO.parse(infile, "fasta"))#parse input fasta
 
 	print("removing shorter transcripts from a pool of {} total transcripts".format(len(records)))
 
-	for rec in records:
-		# .*gene:(\w*\d*\.?\d?).*|.*\[protein_id=(\w*\.?\d?)\].* -> groups ENSHGLG00100018755.1
-		#
-		m = re.search(".*gene:(\w*\d*)\.?\d?.*|.*\[protein_id=(\w*\.?\d?)\].*|(\w+_\d+\.?\d?)|geneid=(\w+)", rec.description)#matches several different gene/protein names in fastas
+	for rec in records: # |(\w+_\d+\.?\d?) <- append to regex for files in case regex fails to pick up on ids
+		m = re.search(".*gene:(\w*\d*)\.?\d?.*|.*\[protein_id=(\w*\.?\d?)\].*|geneid=(\w+)", rec.description)#matches several different gene/protein names in fastas
 		if m:
 			if m.group(1) != None:#checking what id this file uses
 				gene = m.group(1)
@@ -47,6 +46,8 @@ def removeDupes(infile, outfile):
 				gene = m.group(2)
 			elif m.group(3) != None:
 				gene = m.group(3)
+			elif m.group(4) != None:
+				gene = m.group(4)
 
 		if gene in genes:#adding gene to a dictionary
 			dupes += 1
