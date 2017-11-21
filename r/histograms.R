@@ -75,11 +75,33 @@ loc_pfo_dnds <- loc_pfo[loc_pfo$V4>0.001 & loc_pfo$V4<99, 4]
 hist(log(loc_pfo_dnds), breaks = 100, freq = FALSE, main = "Spotted gar - Amazon molly", xlab = "log dnds", ylab = "density")
 lines(density(log(loc_pfo_dnds)), lwd=1, col="red")
 
-for (specie in species){ 
+# # # LOC = reference # # #
+setwd("~/Documents/david/scripts_git/out")
+fish <- dir("./names/fish", full.names = TRUE)
+fishTitles <- c("Gar - Tetra (cave fish)", "Gar - Channel catfish", "Gar - Killifish", "Gar - Medaka", "Gar - Rainbow trout", "Gar - Nile tilapia", "Gar - Amazon molly", "Gar - Southern platyfish")
+
+
+
+for (specie in fish){
   lapply(specie, function(x){
     df <- read.csv(x, sep="\t", header = FALSE)
     dndsRatios = df[df$V4 >0.001 & df$V4<99,4]
-    hist(log(dndsRatios),breaks = 100, freq = FALSE, main=x, xlab = "log dnds", ylab = "density")
+    hist(log(dndsRatios),breaks = 100, freq = FALSE, main=fishTitles[which(fish == specie)], xlab = "log dnds", ylab = "density")
+    lines(density(log(dndsRatios)), lwd = 1, col = "red")
+  })
+}
+
+# # # Birds -gaps -stopcodons # # #
+setwd("~/Documents/david/scripts_git/out")
+birds <- dir("./names/birds", full.names = TRUE)
+birdTitles <- c("Anna's Hummingbird", "Emperor penguin", "Mallard", "Cuckoo", "Sunbittern", "Collared flycatcher", "Chicken", "Bald eagle", "Turkey", "Adelie penguin", "Dalmation pelican", "Barn owl")
+
+
+for (bird in birds){
+  lapply(bird, function(x){
+    df <- read.csv(x, sep="\t", header = FALSE)
+    dndsRatios = df[df$V4 >0.001 & df$V4<99,4]
+    hist(log(dndsRatios),breaks = 100, freq = FALSE, main=paste(birdTitles[which(birds == bird)]," - Turkey vulture"), xlab = "log dnds", ylab = "density")
     lines(density(log(dndsRatios)), lwd = 1, col = "red")
   })
 }
