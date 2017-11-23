@@ -2,3 +2,5 @@ dnds/tmp
 dnds/tmp/*
 names/__pycache__/
 report/.*
+test
+test/*

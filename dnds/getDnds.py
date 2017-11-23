@@ -119,6 +119,7 @@ def calculatedNdS(orthologPairs, refRec, ortRec, mitos, outfile, cwd):
 	fin = time.time() #current time to keep track of speeds
 	counter = 0 #counts number of orthologs processed
 	noAlignmentAvailable = 0
+	ambiguousCodons = 0
 
 
 	for pair in orthologPairs:#loop through all ortholog pairs
@@ -133,10 +134,13 @@ def calculatedNdS(orthologPairs, refRec, ortRec, mitos, outfile, cwd):
 			phylipFile, mitochondrial = maf
 			writeCtl(phylipFile[:-4]+".ctl",phylipFile, phylipFile[:-4], mitochondrial, cwd)#create control file for codeml
 			dndsFile = runCodeml(cwd, phylipFile[:-4]+".ctl", phylipFile[:-4], outfile.split("/")[-1][:-4])#run codeml to find dnds
-			dnds, dn, ds = parseDnDsFile(dndsFile)#parse codeml output
-			
-			out.write("{}\t{}\t{}\t{}\t{}\n".format(pair, orthologPairs[pair], dnds, dn, ds))
 
+			dnds, dn, ds = parseDnDsFile(dndsFile)#parse codeml output
+			if dnds != "-nan" and dn != "-nan" and ds != "-nan":
+				out.write("{}\t{}\t{}\t{}\t{}\n".format(pair, orthologPairs[pair], dnds, dn, ds))
+			
+			else:
+				ambiguousCodons += 1
 
 			os.remove(dndsFile)#cleanup
 			os.remove(cwd + phylipFile)
@@ -151,7 +155,8 @@ def calculatedNdS(orthologPairs, refRec, ortRec, mitos, outfile, cwd):
 				.format(str(round((time.time()-fin)/60, 2)), done, notDone), end="\r")
 
 	print("No alignment available for {} orthologs.\n\tThis can be due to extra stop codons or gaps in alignment".format(str(noAlignmentAvailable)))
-
+	if ambiguousCodons > 0:
+		print("No dNdS available for {} orthologs due to 'synonymous' amino acids with different sequences".format(ambiguousCodons))
 
 def getLastzAlignment(refFasta, ortFasta, cwd):
 	'''
@@ -221,10 +226,8 @@ def findAndRemoveGaps(seqs):
 	gapLocations = set()
 	ungappedSeqs = list()
 	for seq in seqs:
-		[gapLocations.add(x.start()) for x in re.finditer("-", seq)]#find all gaplocations
+		[gapLocations.add(x.start()) for x in re.finditer("-", seq)]#find all indexes of gaps
 	
-	if len(gapLocations) > 1:
-		print("gaps anyway...")#prints if there are still gaps present int the sequences (if --nogapped was used this shouldnt be the case)
 	for seq in seqs:
 		noGapSeq = "".join([char for idx, char in enumerate(seq) if idx not in gapLocations])
 		if len(noGapSeq) % 3 == 1:
@@ -310,10 +313,14 @@ def parseDnDsFile(dndsFile):
 	'''
 	opens the codeml output file and retrieves Dn/Ds ratio, Dn and Ds
 	from it. these are returned in a list.
+	regex matches line in codeml output where dnds is printed
+	eg: t= 0.9626  S=     0.0  N=    57.0  dN/dS=  0.4343  dN = 0.3209  dS =   0.001
+	dnds, dn, ds are grouped. codeml has variable spacing in its output
 	'''
 	
 	dndsData = open(dndsFile, "rU")
-	dnds = re.search("dN/dS\s*?=\s*?(\d+.\d+)\s*?dN\s*?=\s*?(\d+.\d+)\s*?dS\s*?=\s*?(\d+.\d+)", dndsData.readlines()[-1])
+
+	dnds = re.search("dN/dS\s*?=\s*?(\d+\.\d+)\s*?dN\s*?=\s*?(\d+\.\d+)\s*?dS\s*?=\s*?(\d+\.\d+|-nan)", dndsData.readlines()[-1])
 	dndsData.close()
 
 	return dnds.group(1), dnds.group(2), dnds.group(3)
