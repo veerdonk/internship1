@@ -106,6 +106,24 @@ for (bird in birds){
   })
 }
 
+# # # Rodents -gaps -stopcodons # # #
+setwd("~/Documents/david/scripts_git/out")
+rodents <- dir("./names/rodents", full.names = TRUE)
+rodentTitles <- c("Beaver", "Brazillian guinea pig", "Long-tailed chinchilla", "Ord's kangaroo rat", "Damara mole-rat", "Golden hamster", "Shrew mouse", "Mouse", "Degu", "NA deer mouse", "Rat", "Squirrel")
+
+par(mfrow=c(2,2))
+
+for (rodent in rodents){
+  lapply(rodent, function(x){
+    df <- read.csv(x, sep="\t", header = FALSE)
+    dndsRatios = df[df$V4 >0.001 & df$V4<99,4]
+    hist(log(dndsRatios),breaks = 100, freq = FALSE, main=paste(rodentTitles[which(rodents == rodent)]," - Naked mole-rat"), xlab = "log dnds", ylab = "density")
+    abline(h = 0, v = 0, col = "gray60")
+    lines(density(log(dndsRatios)), lwd = 1, col = "red")
+  })
+}
+
+
 # # # TEST # # #
 upsetdata <- read.csv("/home/dylan/Documents/david/scripts/genenames/test.csv", sep=",", header = TRUE)
 
