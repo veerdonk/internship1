@@ -108,7 +108,7 @@ for (bird in birds){
 
 # # # Rodents -gaps -stopcodons # # #
 setwd("~/Documents/david/scripts_git/out")
-rodents <- dir("./names/rodents", full.names = TRUE)
+rodents <- dir("./names/rodents/both", full.names = TRUE)
 rodentTitles <- c("Beaver", "Brazillian guinea pig", "Long-tailed chinchilla", "Ord's kangaroo rat", "Damara mole-rat", "Golden hamster", "Shrew mouse", "Mouse", "Degu", "NA deer mouse", "Rat", "Squirrel")
 
 par(mfrow=c(2,2))
@@ -125,24 +125,73 @@ for (rodent in rodents){
 
 
 # # # TEST # # #
-upsetdata <- read.csv("/home/dylan/Documents/david/scripts/genenames/test.csv", sep=",", header = TRUE)
+upsetdata <- read.csv("/home/dylan/Documents/david/scripts_git/test.csv", sep=",", header = TRUE)
 
 rodentNames <- c("gene", "known ageing genes", "hamster", "damara mole-rat", "guinea pig", "shrew mouse", "mouse", "deer mouse", "degu", "squirrel", "rat", "kangaroo mouse", "chinchilla")
 fishNames <- c("gene", "known ageing gene", "Amazon molly", "Cave fish", "Nile tilapia", "Medaka", "Southern platyfish")
-colnames(upsetdata) <- fishNames
+primateNames <- c("gene", "ageing gene", "olive baboon", "squirrel monkey", "green monkey", "gorilla", "tarsier", "macaque")
 
+
+colnames(upsetdata) <- primateNames
+ageingGenes <- upsetdata$gene[upsetdata$ageing_genes]
 
 #tail(names, -1)
 #install.packages("UpSetR")
 library("UpSetR")
 require(ggplot2); require(plyr); require(gridExtra); require(grid);
-upset(upsetdata, sets = fishNames[2:7], nintersects = NA, order.by = "freq")
+# , queries = list(list(query = intersects, params = list("ageing.genes", "csa"), active = T))
+upset(upsetdata, sets = c("ageing_genes", "csa", "soe", "pan", "ggo", "tsy", "mmu"), keep.order = T, order.by = "freq", nintersects = NA, queries = list(
+  list(query=intersects, params= list("ageing_genes", "pan", "ggo"), active=T),
+  list(query=intersects, params= list("pan", "ggo", "mmu"),active=T),
+  list(query=intersects, params= list("soe", "csa", "tsy"),active=T),
+  list(query= elements, params = list("gene", "ADA2", "TEP1", 'FAS', 'FMC1', 'HAP1', 'MRPS16', 'PLAU', 'SWI5'))
+))
 
 
 movies <- read.csv( system.file("extdata", "movies.csv", package = "UpSetR"), header=T, sep=";" )
 upset(movies, sets = c("Action", "Adventure", "Children", "War", "Noir"),
       queries = list(list(query = intersects, params = list("War"), active = T),
                      list(query = intersects, params = list("Adventure", "Action"))))
+
+movies <- read.csv( system.file("extdata", "movies.csv", package = "UpSetR"), header=TRUE, sep=";" )
+
+require(ggplot2); require(plyr); require(gridExtra); require(grid);
+
+between <- function(row, min, max){
+  newData <- (row["ReleaseDate"] < max) & (row["ReleaseDate"] > min)
+}
+
+plot1 <- function(mydata, x){
+  myplot <- (ggplot(mydata, aes_string(x= x, fill = "color"))
+             + geom_histogram() + scale_fill_identity()
+             + theme(plot.margin = unit(c(0,0,0,0), "cm")))
+}
+
+plot2 <- function(mydata, x, y){
+  myplot <- (ggplot(data = mydata, aes_string(x=x, y=y, colour = "color"), alpha = 0.5)
+             + geom_point() + scale_color_identity()
+             + theme_bw() + theme(plot.margin = unit(c(0,0,0,0), "cm")))
+}
+
+attributeplots <- list(gridrows = 55,
+                       plots = list(list(plot = plot1, x= "ReleaseDate",  queries = FALSE),
+                                    list(plot = plot1, x= "ReleaseDate", queries = TRUE),
+                                    list(plot = plot2, x = "ReleaseDate", y = "AvgRating", queries = FALSE),
+                                    list(plot = plot2, x = "ReleaseDate", y = "AvgRating", queries = TRUE)),
+                       ncols = 3)
+
+upset(movies, nsets = 7, nintersects = 30, mb.ratio = c(0.5, 0.5),
+      order.by = c("freq", "degree"), decreasing = c(TRUE,FALSE))
+
+upset(movies, sets = c("Drama", "Comedy", "Action", "Thriller", "Western", "Documentary"),
+      queries = list(list(query = intersects, params = list("Drama", "Action")),
+                     list(query = between, params = list(1970, 1980), color = "red", active = TRUE)))
+
+upset(movies, attribute.plots = attributeplots,
+      queries = list(
+                     list(query = intersects, params = list("Drama"), color= "red"),
+                     list(query = elements, params = list("ReleaseDate", 1990, 1991, 1992))),
+      main.bar.color = "grey")
 
 
 dev.off()

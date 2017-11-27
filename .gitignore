@@ -4,3 +4,5 @@ names/__pycache__/
 report/.*
 test
 test/*
+resultPrep/__pycache__/
+resultPrep/__pycache__/*

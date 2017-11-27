@@ -10,6 +10,7 @@ Date:	11/2017
 
 import argparse
 import glob
+import re
 
 def parseCli():
 	'''
@@ -34,12 +35,13 @@ def parseDndsFile(filename, dndsGeneDict):
 
 	genes = list()
 	file = open(filename, "rU")
+	name = re.search("_([a-z]{3}[a-z]?)_", filename).group(1)
 	for line in file:
 		line = line.split("\t")
-		# if float(line[3]) > 1:
-		genes.append(line[0])
+		if float(line[3]) > 1 and float(line[3]) < 99:
+			genes.append(line[0].lower())
 
-	dndsGeneDict[filename] = genes
+	dndsGeneDict[name] = genes
 	file.close()
 
 	return dndsGeneDict
@@ -104,13 +106,17 @@ def createUpsetData(refGeneNames, knownGeneNames, dndsGeneDict, outfileName):
 	
 	out = open(outfileName,"w")
 	lineSize = len(dndsGeneDict) + 1 #number of columns (+1 for the known genes)
-	out.write("gene,ageing genes,{}\n".format(dndsGeneDict.keys()))
+	out.write("gene,ageing_genes")
+	for name in dndsGeneDict.keys():
+		print(name)
+		out.write(",{}".format(name))
+	out.write("\n")
 	for gene in refGeneNames:
 		lineData = [0] * lineSize
 		if gene.lower() in knownGeneNames:
 			lineData[0] = 1
 		for i, file in enumerate(dndsGeneDict):
-			if gene in dndsGeneDict[file]:
+			if gene.lower() in dndsGeneDict[file]:
 				lineData[i+1] = 1 #sets index to 1 if gene is present
 		
 		out.write("{},{}\n".format(gene, str(lineData)[1:-1]))

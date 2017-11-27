@@ -75,9 +75,13 @@ def parseGeneNamesInExcel(filename):
 	for line in geneNameFile:
 		line = line.strip().split("\t")
 		if len(line) > 1:
-			geneNames[line[0][:-2]] = line[1].split(" ")[0] #dont use last 2 chars of identifier
+			gene = line[1].split(" ")[0]
+			if len(gene) > 1:
+				geneNames[line[0][:-2]] = gene #dont use last 2 chars of identifier
+			else:
+				geneNames[line[0][:-2]] = line[0][:-2]
 		else:												#Change slice as needed
-			geneNames[line[0][:-2]] = line[0]
+			geneNames[line[0][:-2]] = line[0][:-2]
 	return geneNames
 
 def getDndsEntries(filename):
@@ -212,12 +216,12 @@ def writeOutputFile(outputDir, filename, geneNames, dndsEntries):
 			if geneNames[entry.ref] == entry.ref:
 				noName += 1
 		except KeyError:
-			print("WARNING: {} does not have a matching gene name".format(entry.ref))
+			# print("WARNING: {} does not have a matching gene name".format(entry.ref))
+			noName += 1
 			out.write("None\t{}".format(str(entry)))
 
 	out.close()
-	if noName != 0:
-		print("no gene name found for {} genes, defaulting to reference ensembl ID".format(noName))
+	print("no gene name found for {} genes, defaulting to reference ensembl ID".format(noName))
 
 def doubleModeOutput(outFile, namesRef, namesOrt, entries):
 	'''
