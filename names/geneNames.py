@@ -10,7 +10,8 @@ def parseCli():
 	'''
 	Parses commandline arguments
 	'''
-	parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description="Has two run modes. basic usage:\n\
+	parser = argparse.ArgumentParser(formatter_class = argparse.RawDescriptionHelpFormatter, description= \
+		"Has two run modes. basic usage:\n\
 		Provide a directory containing your files with dnds values (--dndsDir)\n\
 		Provide a file (can be .txt/.gff/.cds/.tsv) containing gene names of your reference organism (--geneNames)\n\
 		Provide a directory to write the output to (--outputDir)\n\
@@ -20,9 +21,12 @@ def parseCli():
 		The file you want to get the gene names for (--dndsFile)\n\
 		2 files containing gene names, one for reference, one for ortholog (--namesRef, --namesOrt)\n\
 		Name of the file to write the output to (--outFile)")
+
 	parser.add_argument("--dndsDir", "-d", help="directory containing output of getDnds.py that you want to assign reference gene names")
 	parser.add_argument("--geneNames", "-g", help="file containing matching identifiers with dndsFile and gene names")
 	parser.add_argument("--outputDir", "-o", help="directory where you want the output saved")
+	parser.add_argument("--just_names", help="add flag if you only want the output of --names_output but no dnds file conversion", action="store_true")
+	parser.add_argument("--names_output", help="add to also save an id - genename link file")
 
 	parser.add_argument("--both_names", help="use two files containing gene names, one with reference names\
 	 the other with gene names of it's pair. NOTE: requires the --dndsFile, --namesRef, --namesOrt and --outFile (-df, -nr, -no, -of) params\
@@ -223,6 +227,20 @@ def writeOutputFile(outputDir, filename, geneNames, dndsEntries):
 	out.close()
 	print("no gene name found for {} genes, defaulting to reference ensembl ID".format(noName))
 
+def writeNamesFile(filename, geneNames):
+	'''
+	Writes a file with identifier and genename to be used by other scripts
+	IN:
+	dictionary containing gene names
+	OUT:
+	file containing indentifier \t genename
+	'''
+	out = open(filename, "w")
+	out.write("identifier\tgenename\n")
+	for gene in geneNames:
+		out.write("{}\t{}\n".format(gene, geneNames[gene]))
+	out.close()
+
 def doubleModeOutput(outFile, namesRef, namesOrt, entries):
 	'''
 	writes the output for --both_names mode
@@ -254,19 +272,23 @@ def main():
 	'''
 
 	args, parser = parseCli()
-	if args.both_names == False:
+	if args.both_names == False and args.just_names == False:
 		geneNames = getNamesFromFile(args.geneNames)
 		for dndsFile in glob.glob(args.dndsDir+"/*.tsv"):
 			print("processing: {}...".format(dndsFile.split("/")[-1]))
 			dndsEntries = getDndsEntries(dndsFile)
 			writeOutputFile(args.outputDir, dndsFile, geneNames, dndsEntries)
 
-	elif args.namesRef is not None or args.namesOrt is not None or args.outFile is not None or args.outFile is not None:
+	elif args.namesRef is not None and args.namesOrt is not None and args.outFile is not None and args.outFile is not None:
 		namesRef = getNamesFromFile(args.namesRef)
 		namesOrt = getNamesFromFile(args.namesOrt)
 		entries = getDndsEntries(args.dndsFile)
 
 		doubleModeOutput(args.outFile, namesRef, namesOrt, entries)
+
+	elif args.just_names == True and args.names_output is not None and args.geneNames is not None:
+		names = getNamesFromFile(args.geneNames)
+		writeNamesFile(args.names_output, names)
 
 	else:
 		parser.print_help()
