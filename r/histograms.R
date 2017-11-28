@@ -93,7 +93,7 @@ for (specie in fish){
 
 # # # Birds -gaps -stopcodons # # #
 setwd("~/Documents/david/scripts_git/out")
-birds <- dir("./names/birds", full.names = TRUE)
+birds <- dir("./names/birds/both", full.names = TRUE)
 birdTitles <- c("Anna's Hummingbird", "Emperor penguin", "Mallard", "Cuckoo", "Sunbittern", "Collared flycatcher", "Chicken", "Bald eagle", "Turkey", "Adelie penguin", "Dalmation pelican", "Barn owl")
 
 
@@ -123,6 +123,20 @@ for (rodent in rodents){
   })
 }
 
+# # # Whales -gaps -stopcodons # # #
+setwd("~/Documents/david/scripts_git/out")
+whales <- dir("./names/whales/", full.names = TRUE)
+whaleTitles <- c("Minke whale", "Killer whale", "Sperm whale", "Dolphin")
+
+for (whale in whales){
+  lapply(whale, function(x){
+    df <- read.csv(x, sep="\t", header = FALSE)
+    dndsRatios <- df[df$V4 > 0.001 & df$V4 < 99, 4]
+    hist(log(dndsRatios), breaks = 100, freq = FALSE, main = paste(whaleTitles[which(whales == whale)], " - Bowhead whale"), xlab = "log dNdS", ylab = "density")
+    abline(h = 0, v = 0, col = "gray60")
+    lines(density(log(dndsRatios)), lwd = 1, col = "red")
+  })
+}
 
 # # # TEST # # #
 upsetdata <- read.csv("/home/dylan/Documents/david/scripts_git/test.csv", sep=",", header = TRUE)
@@ -148,51 +162,10 @@ upset(upsetdata, sets = c("ageing_genes", "csa", "soe", "pan", "ggo", "tsy", "mm
 ))
 
 
-movies <- read.csv( system.file("extdata", "movies.csv", package = "UpSetR"), header=T, sep=";" )
-upset(movies, sets = c("Action", "Adventure", "Children", "War", "Noir"),
-      queries = list(list(query = intersects, params = list("War"), active = T),
-                     list(query = intersects, params = list("Adventure", "Action"))))
-
-movies <- read.csv( system.file("extdata", "movies.csv", package = "UpSetR"), header=TRUE, sep=";" )
-
-require(ggplot2); require(plyr); require(gridExtra); require(grid);
-
-between <- function(row, min, max){
-  newData <- (row["ReleaseDate"] < max) & (row["ReleaseDate"] > min)
-}
-
-plot1 <- function(mydata, x){
-  myplot <- (ggplot(mydata, aes_string(x= x, fill = "color"))
-             + geom_histogram() + scale_fill_identity()
-             + theme(plot.margin = unit(c(0,0,0,0), "cm")))
-}
-
-plot2 <- function(mydata, x, y){
-  myplot <- (ggplot(data = mydata, aes_string(x=x, y=y, colour = "color"), alpha = 0.5)
-             + geom_point() + scale_color_identity()
-             + theme_bw() + theme(plot.margin = unit(c(0,0,0,0), "cm")))
-}
-
-attributeplots <- list(gridrows = 55,
-                       plots = list(list(plot = plot1, x= "ReleaseDate",  queries = FALSE),
-                                    list(plot = plot1, x= "ReleaseDate", queries = TRUE),
-                                    list(plot = plot2, x = "ReleaseDate", y = "AvgRating", queries = FALSE),
-                                    list(plot = plot2, x = "ReleaseDate", y = "AvgRating", queries = TRUE)),
-                       ncols = 3)
-
-upset(movies, nsets = 7, nintersects = 30, mb.ratio = c(0.5, 0.5),
-      order.by = c("freq", "degree"), decreasing = c(TRUE,FALSE))
-
-upset(movies, sets = c("Drama", "Comedy", "Action", "Thriller", "Western", "Documentary"),
-      queries = list(list(query = intersects, params = list("Drama", "Action")),
-                     list(query = between, params = list(1970, 1980), color = "red", active = TRUE)))
-
-upset(movies, attribute.plots = attributeplots,
-      queries = list(
-                     list(query = intersects, params = list("Drama"), color= "red"),
-                     list(query = elements, params = list("ReleaseDate", 1990, 1991, 1992))),
-      main.bar.color = "grey")
-
+rodent_kg <-  read.csv("/home/dylan/Documents/david/scripts_git/out/upset/rodent_kg.csv", sep=",", header = TRUE)
+upset(rodent_kg, nsets = 12, queries = list(
+  list(query = elements, params = list("gene", "FOXO3"))
+))
 
 dev.off()
 

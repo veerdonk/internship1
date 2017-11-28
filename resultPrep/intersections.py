@@ -21,6 +21,7 @@ def parseCli():
 	parser.add_argument("--dndsWithGeneNameDir", "-d", help="directory containing output of geneNames.py", required = True)
 	parser.add_argument("--knownGenes", "-k", help="file containing known ageing genes", required = True)
 	parser.add_argument("--genesToCheck", "-g", help="comma separated list of genes to check the presence of eg CEPBa,SKAP2,ANK2")
+	parser.add_argument("--upsetDataFile", "-u", help="if given an UpSetR compatible .csv will be written.")
 
 	return parser.parse_args()
 
@@ -79,11 +80,26 @@ def findIntersect(filename, knownGenes, genesToCheck):
 
 	return psg, intersect, checked
 
+def writeUpset(filename, geneOccurance, organisms):
+	'''
+	writes an UpSetR compatible file using the known gene occurance rates
+	'''
+	out = open(filename, "w")
+	out.write("gene,{}\n".format(str(organisms)[1:-1].replace("'", "")))
+
+	for gene in geneOccurance:
+		line = [0]*len(organisms)
+		for org in geneOccurance[gene]:
+			line[organisms.index(org)] = 1
+		out.write("{},{}\n".format(gene, str(line)[1:-1]))
+
+	out.close()
 
 def main():
 	'''
 	Controller function
 	'''
+
 	args = parseCli()
 	knownGenes = getKnownGenes(args.knownGenes)
 	allPsg = dict()
@@ -115,14 +131,17 @@ def main():
 		print(sorted(intersect))
 		# print("Known ageing genes found in {}: {}\nOf these {} genes {} were positively selected for".format(filename, len(intersect), len(intersect), len(psg)))
 	
-	old = set(("hgl", "can", "fda", "cla", "ode"))
 
-
+	organisms = list()
 	for gene in geneOccurance:
-		if len(geneOccurance[gene]) > 2:
-			print(set(geneOccurance[gene]) & old)
-			print("{} : {} -> {}".format(gene, len(geneOccurance[gene]), geneOccurance[gene]))
+		for org in geneOccurance[gene]:
+			if org not in organisms:
+				organisms.append(org)
+		if len(geneOccurance[gene]) > 1:
+			print("{}\t: {}/{} -> {}".format(gene, len(geneOccurance[gene]), len(filenames), sorted(geneOccurance[gene])))
 
+	if args.upsetDataFile is not None:
+		writeUpset(args.upsetDataFile, geneOccurance, organisms)
 
 	# oldIntersect = allPsg["hsa_ggo_dndsGeneNames.tsv"] & allPsg["hsa_pan_dndsGeneNames.tsv"] & allPsg["hsa_mmu_dndsGeneNames.tsv"]
 	# youngIntersect = allPsg["hsa_soe_dndsGeneNames.tsv"] & allPsg["hsa_csa_dndsGeneNames.tsv"] & allPsg["hsa_tsy_dndsGeneNames.tsv"]
