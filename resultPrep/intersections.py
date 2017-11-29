@@ -127,27 +127,40 @@ def main():
 			print("checked genes found in file:")
 			for entry in checked:
 				print(entry.name)
-		allPsg[filename.split("/")[-1]] = psg
+		allPsg[name] = psg
 		print(sorted(intersect))
 		# print("Known ageing genes found in {}: {}\nOf these {} genes {} were positively selected for".format(filename, len(intersect), len(intersect), len(psg)))
 	
-
+	print("\nKnown ageing genes found in more than 2 organisms:")
 	organisms = list()
 	for gene in geneOccurance:
 		for org in geneOccurance[gene]:
 			if org not in organisms:
 				organisms.append(org)
-		if len(geneOccurance[gene]) > 1:
-			print("{}\t: {}/{} -> {}".format(gene, len(geneOccurance[gene]), len(filenames), sorted(geneOccurance[gene])))
+		if len(geneOccurance[gene]) > 2:
+			print("{}\t\t: {}/{} -> {}".format(gene, len(geneOccurance[gene]), len(filenames), sorted(geneOccurance[gene])))
 
 	if args.upsetDataFile is not None:
 		writeUpset(args.upsetDataFile, geneOccurance, organisms)
+		psgNames = dict()
+		psgOrgs = list()
+		for org in allPsg:
+			for gene in allPsg[org]:
+				if gene not in psgNames:
+					psgNames[gene] = [org]
+				else:
+					psgNames[gene].append(org)
+			if org not in psgOrgs:
+				psgOrgs.append(org)
 
-	# oldIntersect = allPsg["hsa_ggo_dndsGeneNames.tsv"] & allPsg["hsa_pan_dndsGeneNames.tsv"] & allPsg["hsa_mmu_dndsGeneNames.tsv"]
-	# youngIntersect = allPsg["hsa_soe_dndsGeneNames.tsv"] & allPsg["hsa_csa_dndsGeneNames.tsv"] & allPsg["hsa_tsy_dndsGeneNames.tsv"]
-	# print(len(oldIntersect))
-	# print(len(youngIntersect))
-	# print(youngIntersect)
+	
+		writeUpset(args.upsetDataFile[:-4]+"_allPSG.csv", psgNames, psgOrgs)
+
+	print("\nPositively selected genes found in more than 10 organisms:")
+	for gene in psgNames:
+		if len(psgNames[gene]) > 9:
+			print("{}\t: {}/{} -> {}".format(gene, len(psgNames[gene]), len(filenames), sorted(psgNames[gene])))
+	
 
 if __name__ == "__main__":
 	main()

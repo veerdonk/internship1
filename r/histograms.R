@@ -1,16 +1,8 @@
-setwd("~/Documents/david/scripts/genenames/out")
 pdf("histograms.pdf")
-rodentFiles <- dir("./rodents", full.names = TRUE)
-fishFiles <- dir("./fish_gar", full.names = TRUE)
-whaleFiles <- dir("./whales", full.names = TRUE)
-birdFiles <- dir("./birds", full.names = TRUE)
-batFiles <- dir("./bats", full.names = TRUE)
-primateFiles <- dir("./primates", full.names = TRUE)
-# species <- c(rodentFiles, fishFiles, whaleFiles, birdFiles, batFiles, primateFiles)
-species <- c(primateFiles)
+
 # # # files ###
 hsa_mmu <- read.csv("/home/dylan/Documents/david/scripts/genenames/out/primates/hsa_mmu_dndsGeneNames.tsv", sep="\t", header = FALSE)
-hsa_pan <- read.csv("/home/dylan/Documents/david/scripts/genenames/out/primates/hsa_pan_dndsGeneNames.tsv", sep="\t", header = FALSE)
+hsa_pan <- read.csv("/home/dylan/Documents/david/scripts_git/out/names/primates/hsa_pan_dndsGeneNames.tsv", sep="\t", header = FALSE)
 ensembl_hsa_pan <- read.csv("/home/dylan/Documents/david/resources/primates/hsa_pan_dn_ds.txt", sep="\t")
 human_pan_nostop <- read.csv("../human_pan_dndsGeneNames.tsv", sep="\t", header = FALSE)
 ensemblHuman <- read.csv("/home/dylan/Documents/david/resources/primates/human_macaque_dn_ds.txt", sep="\t")
@@ -31,11 +23,11 @@ hist(log(hsa_mmu[hsa_mmu$V4 > 0.001 & hsa_mmu$V4 < 99,4]),breaks = 100, freq = F
 lines(density(log(na.omit(hsa_mmu[hsa_mmu$V4 > 0.001 & hsa_mmu$V4 < 99, 4]))), lwd = 1, col = "red")
 
 #human babboon calculated
-hist(log(hsa_mmu[hsa_mmu$V4 > 0.001 & hsa_mmu$V4 < 99,4]),breaks = 100, freq = FALSE, main="human & baboon dN/dS (PAML)", xlab = "log dnds", ylab = "density")
-lines(density(log(na.omit(hsa_mmu[hsa_mmu$V4 > 0.001 & hsa_mmu$V4 < 99, 4]))), lwd = 1, col = "red")
+hist(log(hsa_pan[hsa_pan$V4 > 0.001 & hsa_pan$V4 < 99,4]),breaks = 50, freq = FALSE, main="human & baboon dN/dS (PAML)", xlab = "log dnds", ylab = "density")
+lines(density(log(na.omit(hsa_pan[hsa_pan$V4 > 0.001 & hsa_pan$V4 < 99, 4]))), lwd = 1, col = "red")
 #human-babboon ensembl
 ensembl_hsa_pan_dnds <- ensembl_hsa_pan$dN.with.Olive.baboon/ensembl_hsa_pan$dS.with.Olive.baboon
-hist(log(ensembl_hsa_pan_dnds),breaks = 100, freq = FALSE, main="human & baboon dN/dS (ensembl)", xlab = "log dnds", ylab = "density")
+hist(log(ensembl_hsa_pan_dnds),breaks = 50, freq = FALSE, main="human & baboon dN/dS (ensembl)", xlab = "log dnds", ylab = "density")
 lines(density(log(na.omit(ensembl_hsa_pan_dnds))), lwd = 1, col = "red")
 #human baoon calculated without stop/gap
 hist(log(human_pan_nostop[human_pan_nostop$V4 > 0.001 & human_pan_nostop$V4 < 99,4]),breaks = 100, freq = FALSE, main="human & baboon dN/dS (PAML-no stop/gap)", xlab = "log dnds", ylab = "density")
@@ -75,18 +67,17 @@ loc_pfo_dnds <- loc_pfo[loc_pfo$V4>0.001 & loc_pfo$V4<99, 4]
 hist(log(loc_pfo_dnds), breaks = 100, freq = FALSE, main = "Spotted gar - Amazon molly", xlab = "log dnds", ylab = "density")
 lines(density(log(loc_pfo_dnds)), lwd=1, col="red")
 
-# # # LOC = reference # # #
+# # # Fish -gaps -stopcodons LOC = reference # # #
+par(mfrow=c(2,2))
 setwd("~/Documents/david/scripts_git/out")
 fish <- dir("./names/fish", full.names = TRUE)
-fishTitles <- c("Gar - Tetra (cave fish)", "Gar - Channel catfish", "Gar - Killifish", "Gar - Medaka", "Gar - Rainbow trout", "Gar - Nile tilapia", "Gar - Amazon molly", "Gar - Southern platyfish")
-
-
+fishTitles <- c("Tetra (cave fish)", "Channel catfish", "Killifish", "Medaka", "Rainbow trout", "Nile tilapia", "Amazon molly", "Southern platyfish")
 
 for (specie in fish){
   lapply(specie, function(x){
     df <- read.csv(x, sep="\t", header = FALSE)
     dndsRatios = df[df$V4 >0.001 & df$V4<99,4]
-    hist(log(dndsRatios),breaks = 100, freq = FALSE, main=fishTitles[which(fish == specie)], xlab = "log dnds", ylab = "density")
+    hist(log(dndsRatios),breaks = 100, freq = FALSE, main=paste(fishTitles[which(fish == specie)], " - Gar"), xlab = "log dnds", ylab = "density")
     lines(density(log(dndsRatios)), lwd = 1, col = "red")
   })
 }
@@ -110,8 +101,6 @@ for (bird in birds){
 setwd("~/Documents/david/scripts_git/out")
 rodents <- dir("./names/rodents/both", full.names = TRUE)
 rodentTitles <- c("Beaver", "Brazillian guinea pig", "Long-tailed chinchilla", "Ord's kangaroo rat", "Damara mole-rat", "Golden hamster", "Shrew mouse", "Mouse", "Degu", "NA deer mouse", "Rat", "Squirrel")
-
-par(mfrow=c(2,2))
 
 for (rodent in rodents){
   lapply(rodent, function(x){
@@ -138,34 +127,34 @@ for (whale in whales){
   })
 }
 
-# # # TEST # # #
-upsetdata <- read.csv("/home/dylan/Documents/david/scripts_git/test.csv", sep=",", header = TRUE)
+# # # Bats -gaps -stopcodons # # #
+setwd("~/Documents/david/scripts_git/out")
+bats <- dir("./names/bats/", full.names = TRUE)
+batsTitles <- c("Big brown bat", "Natal long-fingered bat", "David's myotis", "Black flying fox")
 
-rodentNames <- c("gene", "known ageing genes", "hamster", "damara mole-rat", "guinea pig", "shrew mouse", "mouse", "deer mouse", "degu", "squirrel", "rat", "kangaroo mouse", "chinchilla")
-fishNames <- c("gene", "known ageing gene", "Amazon molly", "Cave fish", "Nile tilapia", "Medaka", "Southern platyfish")
-primateNames <- c("gene", "ageing gene", "olive baboon", "squirrel monkey", "green monkey", "gorilla", "tarsier", "macaque")
+for (bat in bats){
+  lapply(bat, function(x){
+    df <- read.csv(x, sep="\t", header = FALSE)
+    dndsRatios <- df[df$V4 > 0.001 & df$V4 < 99, 4]
+    hist(log(dndsRatios), breaks = 100, freq = FALSE, main = paste(batsTitles[which(bats == bat)], " - Brandt's bat"), xlab = "log dNdS", ylab = "density")
+    abline(h = 0, v = 0, col = "gray60")
+    lines(density(log(dndsRatios)), lwd = 1, col = "red")
+  })
+}
 
+# # # Primates -gaps -stopcodons # # #
+primates <- dir("./names/primates/", full.names = TRUE)
+primateTitles <- c("Green monkey", "Gorilla", "Macaque", "Olive baboon", "Squirrel monkey", "Phillipine tarsier")
 
-colnames(upsetdata) <- primateNames
-ageingGenes <- upsetdata$gene[upsetdata$ageing_genes]
-
-#tail(names, -1)
-#install.packages("UpSetR")
-library("UpSetR")
-require(ggplot2); require(plyr); require(gridExtra); require(grid);
-# , queries = list(list(query = intersects, params = list("ageing.genes", "csa"), active = T))
-upset(upsetdata, sets = c("ageing_genes", "csa", "soe", "pan", "ggo", "tsy", "mmu"), keep.order = T, order.by = "freq", nintersects = NA, queries = list(
-  list(query=intersects, params= list("ageing_genes", "pan", "ggo"), active=T),
-  list(query=intersects, params= list("pan", "ggo", "mmu"),active=T),
-  list(query=intersects, params= list("soe", "csa", "tsy"),active=T),
-  list(query= elements, params = list("gene", "ADA2", "TEP1", 'FAS', 'FMC1', 'HAP1', 'MRPS16', 'PLAU', 'SWI5'))
-))
-
-
-rodent_kg <-  read.csv("/home/dylan/Documents/david/scripts_git/out/upset/rodent_kg.csv", sep=",", header = TRUE)
-upset(rodent_kg, nsets = 12, queries = list(
-  list(query = elements, params = list("gene", "FOXO3"))
-))
+for (primate in primates){
+  lapply(primate, function(x){
+    df <- read.csv(x, sep = "\t", header = FALSE)
+    dndsRatios <- df[df$V4 > 0.001 & df$V4 < 99, 4]
+    hist(log(dndsRatios), breaks = 100, freq = FALSE, main = paste(primateTitles[which(primates == primate)], " - Human"))
+    abline(h = 0, v = 0, col = "gray60")
+    lines(density(log(dndsRatios)), lwd = 1, col = "red")
+  })
+}
 
 dev.off()
 
