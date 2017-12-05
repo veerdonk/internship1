@@ -133,12 +133,15 @@ def main():
 	
 	print("\nKnown ageing genes found in more than 2 organisms:")
 	organisms = list()
+	geneList = open("geneTestFile.csv", "w")
+	geneList.write("Ageing genes\ngene,number,org\n")
 	for gene in geneOccurance:
 		for org in geneOccurance[gene]:
 			if org not in organisms:
 				organisms.append(org)
 		if len(geneOccurance[gene]) > 2:
 			print("{}\t\t: {}/{} -> {}".format(gene, len(geneOccurance[gene]), len(filenames), sorted(geneOccurance[gene])))
+			geneList.write("{},{}/{},{}\n".format(gene, len(geneOccurance[gene]), len(filenames), str(sorted(geneOccurance[gene])).replace("'", "")[1:-1]))
 
 	if args.upsetDataFile is not None:
 		writeUpset(args.upsetDataFile, geneOccurance, organisms)
@@ -157,10 +160,12 @@ def main():
 		writeUpset(args.upsetDataFile[:-4]+"_allPSG.csv", psgNames, psgOrgs)
 
 	print("\nPositively selected genes found in more than 10 organisms:")
+	geneList.write("\n\nALL genes\ngene,number,org\n")
 	for gene in psgNames:
 		if len(psgNames[gene]) > 9:
 			print("{}\t: {}/{} -> {}".format(gene, len(psgNames[gene]), len(filenames), sorted(psgNames[gene])))
+			geneList.write("{},{}/{},{}\n".format(gene, len(psgNames[gene]), len(filenames), str(sorted(psgNames[gene])).replace("'", "")[1:-1]))
 	
-
+	geneList.close()
 if __name__ == "__main__":
 	main()

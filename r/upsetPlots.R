@@ -59,3 +59,6 @@ upset(birds_all, nsets = 12, queries = list(
 
 fish_kg <- read.csv("/home/dylan/Documents/david/scripts_git/out/upset/fish_kg.csv", sep = ",", header = TRUE, row.names = "gene")
 upset(fish_kg, nsets = 12,order.by = "freq", decreasing = FALSE)
+
+all <- read.csv("/home/dylan/Documents/david/scripts_git/internship1/resultPrep/test.csv", sep=",", header = TRUE)
+upset(all, nsets = 8, nintersects = 20)

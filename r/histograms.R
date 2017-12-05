@@ -1,4 +1,4 @@
-pdf("histograms.pdf")
+pdf("histograms2.pdf")
 
 # # # files ###
 hsa_mmu <- read.csv("/home/dylan/Documents/david/scripts/genenames/out/primates/hsa_mmu_dndsGeneNames.tsv", sep="\t", header = FALSE)
