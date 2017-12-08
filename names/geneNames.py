@@ -122,7 +122,7 @@ def parseGeneNamesInName(filename):
 	for line in geneNameFile:
 		if line[0] == ">":
 			line = line[1:].strip().split()
-			m = re.search("\w+_([A-Z,a-z,0-9]+)_\d+", line[0])
+			m = re.search("\w+_([A-Z,a-z,0-9]+_\d+)", line[0])
 		
 			if m:
 				geneName = m.group(1)
@@ -216,9 +216,10 @@ def writeOutputFile(outputDir, filename, geneNames, dndsEntries):
 
 	for entry in dndsEntries:
 		try:
-			out.write("{}\t{}".format(geneNames[entry.ref], str(entry)))
-			if geneNames[entry.ref] == entry.ref:
-				noName += 1
+			if geneNames[entry.ref] != "REMOVE":
+				out.write("{}\t{}".format(geneNames[entry.ref], str(entry)))
+				if geneNames[entry.ref] == entry.ref:
+					noName += 1
 		except KeyError:
 			# print("WARNING: {} does not have a matching gene name".format(entry.ref))
 			noName += 1
