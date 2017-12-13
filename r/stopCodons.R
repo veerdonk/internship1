@@ -176,8 +176,8 @@ for (primateFile in primateFiles){
 
 setwd("~/Documents/david/scripts_git/out/stops")
 stops <- as.factor(c("TAG", "TAA", "TGA"))
-cavia <- read.csv("./rodents/cap.csv", header = FALSE, stringsAsFactors = FALSE)
-monkey <- read.csv("./primates/csa.csv", header = FALSE, stringsAsFactors = FALSE)
+cavia <- read.csv("./rodents/rno.csv", header = FALSE, stringsAsFactors = FALSE)
+monkey <- read.csv("./primates/ggo.csv", header = FALSE, stringsAsFactors = FALSE)
 cavia <- cavia[cavia$V7 %in% stops,]
 monkey <- monkey[monkey$V7 %in% stops,]
 
