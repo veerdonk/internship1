@@ -31,7 +31,7 @@ def parseCDS(filename):
 			if lineLen != 0:
 				cdsLength[ID] = lineLen
 			lineLen = 0
-			m = re.search("_([a-zA-Z0-9]+)_\d|(Cau_\w+)", line)
+			m = re.search("(\w+_[a-zA-Z0-9]+_\w+)|(Cau_\w+)", line)
 			if m:
 				if m.group(1) is not None:
 					ID = m.group(1)
@@ -99,6 +99,7 @@ def main():
 	args = parseCli()
 	cds = parseCDS(args.CDS)
 	occurance = geneOccurance(args.names)
+	print(occurance)
 	writeOutFlags(args.out, cds, occurance)
 
 if __name__ == "__main__":

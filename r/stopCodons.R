@@ -177,7 +177,7 @@ for (primateFile in primateFiles){
 setwd("~/Documents/david/scripts_git/out/stops")
 stops <- as.factor(c("TAG", "TAA", "TGA"))
 cavia <- read.csv("./rodents/rno.csv", header = FALSE, stringsAsFactors = FALSE)
-monkey <- read.csv("./primates/ggo.csv", header = FALSE, stringsAsFactors = FALSE)
+monkey <- read.csv("./primates/mmu.csv", header = FALSE, stringsAsFactors = FALSE)
 cavia <- cavia[cavia$V7 %in% stops,]
 monkey <- monkey[monkey$V7 %in% stops,]
 
@@ -215,3 +215,61 @@ paste("monkey TAA -> TGA:", length(stopsMerged[stopsMerged$stopMonkey == "TAA" &
 paste("monkey TAA -> TAG:", length(stopsMerged[stopsMerged$stopCavia== "TAA" & stopsMerged$stopMonkey == "TAG",1]), "=", length(stopsMerged[stopsMerged$stopCavia== "TAA" & stopsMerged$stopMonkey == "TAG",1])/length(stopsMerged[stopsMerged$stopCavia== "TAA",1])*100, "%")
 paste("monkey TAA -> TGA:", length(stopsMerged[stopsMerged$stopCavia== "TAA" & stopsMerged$stopMonkey == "TGA",1]), "=", length(stopsMerged[stopsMerged$stopCavia== "TAA" & stopsMerged$stopMonkey == "TGA",1])/length(stopsMerged[stopsMerged$stopCavia== "TAA",1])*100, "%")
 
+#house keeping genes
+hk_genes <- read.table("/home/dylan/data/genes/HK_genes.txt", stringsAsFactors = TRUE)
+higlyExpressed <- as.factor(c("C1orf43", "CHMP2A", "EMC7", "GPI", "PSMB2", "PSMB4", "RAB7A", "REEP5", "SNRPD3", "VCP", "VPS29"))
+
+for (prim in primateFiles){
+  monkey <- read.csv(prim, header = FALSE, stringsAsFactors = FALSE)
+  monkey <- monkey[monkey$V7 %in% stops,]
+  monkeyStops <- monkey[,c(1,7)]
+  colnames(monkeyStops) <- c("gene", "stopMonkey")
+  print(prim)
+  #TAA stops in house keeping genes
+  monkeyTaa <- monkeyStops[monkeyStops$stopMonkey == "TAA",]
+  monkeyTaa$gene <- as.factor(monkeyTaa$gene)
+  print("TAA:")
+  # print(sum(monkeyTaa$gene %in% hk_genes$V1))
+  print(sum(monkeyTaa$gene %in% hk_genes$V1)/length(monkeyTaa$gene)*100)
+  
+  
+  #TGA stops in house keeping genes
+  monkeyTga <- monkeyStops[monkeyStops$stopMonkey == "TGA",]
+  monkeyTga$gene <- as.factor(monkeyTga$gene)
+  print("TGA:")
+  # print(sum(monkeyTga$gene %in% hk_genes$V1))
+  print(sum(monkeyTga$gene %in% hk_genes$V1)/length(monkeyTga$gene)*100)
+  
+  
+  #TAG stops in house keeping genes
+  monkeyTag <- monkeyStops[monkeyStops$stopMonkey == "TAG",]
+  monkeyTag$gene <- as.factor(monkeyTag$gene)
+  print("TAG:")
+  #print(sum(monkeyTag$gene %in% hk_genes$V1))
+  print(sum(monkeyTag$gene %in% hk_genes$V1)/length(monkeyTag$gene)*100)
+  
+  print(sum(monkeyTaa$gene %in% higlyExpressed))
+  print(sum(monkeyTga$gene %in% higlyExpressed))
+  print(sum(monkeyTag$gene %in% higlyExpressed))
+}
+
+#TAA stops in house keeping genes
+monkeyTaa <- monkeyStops[monkeyStops$stopMonkey == "TAA",]
+monkeyTaa$gene <- as.factor(monkeyTaa$gene)
+sum(monkeyTaa$gene %in% hk_genes$V1)
+sum(monkeyTaa$gene %in% hk_genes$V1)/length(monkeyTaa$gene)*100
+sum(monkeyTaa$gene %in% higlyExpressed)
+
+#TGA stops in house keeping genes
+monkeyTga <- monkeyStops[monkeyStops$stopMonkey == "TGA",]
+monkeyTga$gene <- as.factor(monkeyTga$gene)
+sum(monkeyTga$gene %in% hk_genes$V1)
+sum(monkeyTga$gene %in% hk_genes$V1)/length(monkeyTga$gene)*100
+sum(monkeyTga$gene %in% higlyExpressed)
+
+#TAG stops in house keeping genes
+monkeyTag <- monkeyStops[monkeyStops$stopMonkey == "TAG",]
+monkeyTag$gene <- as.factor(monkeyTag$gene)
+sum(monkeyTag$gene %in% hk_genes$V1)
+sum(monkeyTag$gene %in% hk_genes$V1)/length(monkeyTag$gene)*100
+sum(monkeyTag$gene %in% higlyExpressed)
