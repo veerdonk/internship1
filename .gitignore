@@ -6,3 +6,6 @@ test
 test/*
 resultPrep/__pycache__/
 resultPrep/__pycache__/*
+stopcodons/__pycache__/
+stopcodons/__pycache__/*
+stopcodons/test.tsv
