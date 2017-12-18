@@ -24,7 +24,7 @@ def parseCds(filename):
 	stopCodons = dict()
 
 	for rec in cds:
-		stopCodons[rec.id] = str(rec.seq[3:6])
+		stopCodons[rec.id] = str(rec.seq[-3:])
 
 	return stopCodons
 
@@ -41,7 +41,8 @@ def parseOrthologs(filename):
 	for line in orthologFile:
 		ort1Ens, ort1Name, orthology, ort2name, ort2Ens = line.strip().split("\t")
 		ortholog = Ortholog(ort1Ens, ort1Name, orthology, ort2name, ort2Ens)
-		orthologs.append(ortholog)
+		if ortholog.orthologyType == "ortholog_one2one":
+			orthologs.append(ortholog)
 
 
 	orthologFile.close()
