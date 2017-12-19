@@ -5,7 +5,8 @@ library("ggnetwork")
 
 setwd("~/Documents/david/scripts_git/out/stops")
 #open file
-alltypes <- read.csv("./human_chicken.tsv", sep = "\t", header = FALSE, stringsAsFactors = FALSE)
+# alltypes <- read.csv("./human_chicken.tsv", sep = "\t", header = FALSE, stringsAsFactors = FALSE)
+alltypes <- read.csv("./human_chicken_one2one.tsv", sep = "\t", header = FALSE, stringsAsFactors = FALSE)
 secondCodon <- read.csv("./human_chicken_second_codon.tsv", sep="\t", header = FALSE, stringsAsFactors = FALSE)
 colnames(alltypes) <- c("humanID", "chickenID", "humanStop", "chickenStop")
 
@@ -27,10 +28,14 @@ tagConservation <- sum(alltypesGoodStops$humanStop == "TAG" & alltypesGoodStops$
 
 stopcodonTrans <- data.frame(TAG = numeric(0), TAA = numeric(0), TGA = numeric(0))
 
+codonFreq <- getCodonFreq(alltypesGoodStops)
+
 for (stop in stopCodons){
-  stopToTga <- round(sum(alltypesGoodStops$humanStop == stop & alltypesGoodStops$chickenStop == "TGA")/sum(alltypesGoodStops$humanStop == stop), 2)
-  stopToTag <- round(sum(alltypesGoodStops$humanStop == stop & alltypesGoodStops$chickenStop == "TAG")/sum(alltypesGoodStops$humanStop == stop), 2)
-  stopToTaa <- round(sum(alltypesGoodStops$humanStop == stop & alltypesGoodStops$chickenStop == "TAA")/sum(alltypesGoodStops$humanStop == stop), 2)
+  stopToTga <- round(sum(alltypesGoodStops$humanStop == stop & alltypesGoodStops$chickenStop == "TGA")/sum(alltypesGoodStops$humanStop == stop), 5)
+  stopToTag <- round(sum(alltypesGoodStops$humanStop == stop & alltypesGoodStops$chickenStop == "TAG")/sum(alltypesGoodStops$humanStop == stop), 5)
+  stopToTaa <- round(sum(alltypesGoodStops$humanStop == stop & alltypesGoodStops$chickenStop == "TAA")/sum(alltypesGoodStops$humanStop == stop), 5)
+  print(stop)
+  print(stopToTaa)
   stopcodonTrans[stop,] <- c(stopToTag, stopToTaa, stopToTga)
 }
 
@@ -94,29 +99,6 @@ freq<- c(sum(alltypesGoodStops$humanStop == "TAA")/length(alltypesGoodStops$huma
 sum(alltypesGoodStops$humanStop == "TGA")/length(alltypesGoodStops$humanID)*100,
 sum(alltypesGoodStops$humanStop == "TAG")/length(alltypesGoodStops$humanID)*100)
 
-#frequencies in higly expressed genes
-bloodFreq <- c(sum(highlyExpressedBlood$humanStop == "TAA")/length(highlyExpressedBlood$humanID)*100,
-sum(highlyExpressedBlood$humanStop == "TGA")/length(highlyExpressedBlood$humanID)*100,
-sum(highlyExpressedBlood$humanStop == "TAG")/length(highlyExpressedBlood$humanID)*100)
-
-sum(highlyExpressedBlood$chickenStop == "TAA")/length(highlyExpressedBlood$chickenID)*100
-sum(highlyExpressedBlood$chickenStop == "TGA")/length(highlyExpressedBlood$chickenID)*100
-sum(highlyExpressedBlood$chickenStop == "TAG")/length(highlyExpressedBlood$chickenID)*100
-
-# conserved stops in highly expressed genes
-#brain
-taabrain <- sum(highlyExpressedBrain$humanStop == "TAA" & highlyExpressedBrain$chickenStop == "TAA")/sum(highlyExpressedBrain$humanStop == "TAA")*100
-tagbrain <- sum(highlyExpressedBrain$humanStop == "TAG" & highlyExpressedBrain$chickenStop == "TAG")/sum(highlyExpressedBrain$humanStop == "TAG")*100
-tgabrain <- sum(highlyExpressedBrain$humanStop == "TGA" & highlyExpressedBrain$chickenStop == "TGA")/sum(highlyExpressedBrain$humanStop == "TGA")*100
-
-#blood
-taablood <- sum(highlyExpressedBlood$humanStop == "TAA" & highlyExpressedBlood$chickenStop == "TAA")/sum(highlyExpressedBlood$humanStop == "TAA")*100
-tagblood <- sum(highlyExpressedBlood$humanStop == "TAG" & highlyExpressedBlood$chickenStop == "TAG")/sum(highlyExpressedBlood$humanStop == "TAG")*100
-tgablood <- sum(highlyExpressedBlood$humanStop == "TGA" & highlyExpressedBlood$chickenStop == "TGA")/sum(highlyExpressedBlood$humanStop == "TGA")*100
-
-#blood eQTL
-sum(highlyExpressedBloodQTL$humanStop == "TAA" & highlyExpressedBloodQTL$chickenStop == "TAA")/sum(highlyExpressedBloodQTL$humanStop == "TAA")*100
-
 for (stop in stopCodons){
   print(stop)
   print(sum(highlyExpressedBrain$humanStop == stop & highlyExpressedBrain$chickenStop == stop))
@@ -128,7 +110,7 @@ expressionNames <- c("adipose", "adrenalGland", "artery", "blood", "brainCortex"
 expressionTables <- c()
 
 stopcodonConservationHighlyExpressed <- data.frame(TAG = numeric(0), TAA = numeric(0), TGA = numeric(0))
-totals <- data.frame(orthologs = numeric(0), TAG = numeric(0), TAA = numeric(0), TGA = numeric(0))
+totals <- data.frame(orthologs = numeric(0), TAG = numeric(0), TAA = numeric(0), TGA = numeric(0), TAGConserved = numeric(0), TAAConserved = numeric(0), TGAConserved = numeric(0))
 
 
 stopcodonTrans <- data.frame(TAG = numeric(0), TAA = numeric(0), TGA = numeric(0))
@@ -144,30 +126,43 @@ for (file in expressionFiles){
   table$Gencode.Id <- apply(table, 1, function(x) strsplit(x[1], "\\.")[[1]][1])
   highlyExpressed <- alltypesGoodStops[alltypesGoodStops$humanID %in% table$Gencode.Id,]
   
+  
+  
   stopcodonTrans <- stopcodonTrans + getCodonFreq(highlyExpressed)
   totals[expressionNames[which(expressionFiles == file)],] <-  c(
     length(highlyExpressed$humanStop),
     sum(highlyExpressed$humanStop == "TAG"),
     sum(highlyExpressed$humanStop == "TAA"),
-    sum(highlyExpressed$humanStop == "TGA")
+    sum(highlyExpressed$humanStop == "TGA"),
+    sum(highlyExpressed$humanStop == "TAG" & highlyExpressed$chickenStop == "TAG"),
+    sum(highlyExpressed$humanStop == "TAA" & highlyExpressed$chickenStop == "TAA"),
+    sum(highlyExpressed$humanStop == "TGA" & highlyExpressed$chickenStop == "TGA")
   )
-  
   stopcodonConservationHighlyExpressed[expressionNames[which(expressionFiles == file)],] <- c(
-    sum(highlyExpressed$humanStop == "TAG" & highlyExpressed$chickenStop == "TAG")/sum(highlyExpressed$humanStop == "TAG"), 
-    sum(highlyExpressed$humanStop == "TAA" & highlyExpressed$chickenStop == "TAA")/sum(highlyExpressed$humanStop == "TAA"), 
-    sum(highlyExpressed$humanStop == "TGA" & highlyExpressed$chickenStop == "TGA")/sum(highlyExpressed$humanStop == "TGA"))
+    round(sum(highlyExpressed$humanStop == "TAG" & highlyExpressed$chickenStop == "TAG")/sum(highlyExpressed$humanStop == "TAG"),2), 
+    round(sum(highlyExpressed$humanStop == "TAA" & highlyExpressed$chickenStop == "TAA")/sum(highlyExpressed$humanStop == "TAA"),2), 
+    round(sum(highlyExpressed$humanStop == "TGA" & highlyExpressed$chickenStop == "TGA")/sum(highlyExpressed$humanStop == "TGA"),2))
 }
 
-mean(stopcodonConservationHighlyExpressed$TAG)
-mean(stopcodonConservationHighlyExpressed$TAA)
-mean(stopcodonConservationHighlyExpressed$TGA)
+conserv <- stopcodonConservationHighlyExpressed
 
-stopcodonConservationHighlyExpressed[stopcodonConservationHighlyExpressed$TGA < tgaConservation,]
+round(stopcodonTrans/22, 2)
+
+median(stopcodonConservationHighlyExpressed$TAG)
+median(stopcodonConservationHighlyExpressed$TAA)
+median(stopcodonConservationHighlyExpressed$TGA)
+
+stopcodonConservationHighlyExpressed[stopcodonConservationHighlyExpressed$TGA > tgaConservation,]
 stopcodonConservationHighlyExpressed[stopcodonConservationHighlyExpressed$TAA < taaConservation,]
 stopcodonConservationHighlyExpressed[stopcodonConservationHighlyExpressed$TAG > tagConservation,]
+# pdf("stopcodonConservation.pdf")
 
-#bionom <- binom.test(28, 44, taaConservation, alternative = "g")
-pancreas <- read.csv("/home/dylan/data/expression//top100pancreas.csv")
-pancreas$Gencode.Id <- pancreas$Gencode.Id <- apply(table, 1, function(x) strsplit(x[1], "\\.")[[1]][1])
-pancreasExpressed <- alltypesGoodStops[alltypesGoodStops$humanID %in% pancreas$Gencode.Id,]
-sum(pancreasExpressed$humanStop == "TAA")
+boxplot(totals[2:4], main = "top 100 genes of 22 tissues (counts)", ylab = "number of genes", xlab = "stopcodon")
+
+boxplot(stopcodonConservationHighlyExpressed, main = "stop conservation in highly expressed", ylab = "conservation", xlab = "stop codon")
+x0s <- 1:3 - 0.4
+x1s <- 1:3 + 0.4
+y0s <- c(tagConservation, taaConservation, tgaConservation)
+segments(x0 = x0s, x1 = x1s, y0 = y0s, col = "red")
+
+# dev.off()
