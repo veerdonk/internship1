@@ -28,7 +28,7 @@ tagConservation <- sum(alltypesGoodStops$humanStop == "TAG" & alltypesGoodStops$
 
 stopcodonTrans <- data.frame(TAG = numeric(0), TAA = numeric(0), TGA = numeric(0))
 
-codonFreq <- getCodonFreq(alltypesGoodStops)
+
 
 for (stop in stopCodons){
   stopToTga <- round(sum(alltypesGoodStops$humanStop == stop & alltypesGoodStops$chickenStop == "TGA")/sum(alltypesGoodStops$humanStop == stop), 5)
@@ -49,10 +49,8 @@ getCodonFreq <- function(x){
   }
   return(stopcodonTest)
 }
-getCodonFreq(alltypesGoodStops)
 
-as.array(as.matrix(stopcodonTrans))
-
+codonFreq <- getCodonFreq(alltypesGoodStops)
 
 #aa = R
 aaCodons <- as.factor(c("CGT",
@@ -148,6 +146,8 @@ conserv <- stopcodonConservationHighlyExpressed
 
 round(stopcodonTrans/22, 2)
 
+binom.test(357, 598, 0.5, alternative = "t")
+
 median(stopcodonConservationHighlyExpressed$TAG)
 median(stopcodonConservationHighlyExpressed$TAA)
 median(stopcodonConservationHighlyExpressed$TGA)
@@ -159,7 +159,7 @@ stopcodonConservationHighlyExpressed[stopcodonConservationHighlyExpressed$TAG > 
 
 boxplot(totals[2:4], main = "top 100 genes of 22 tissues (counts)", ylab = "number of genes", xlab = "stopcodon")
 
-boxplot(stopcodonConservationHighlyExpressed, main = "stop conservation in highly expressed", ylab = "conservation", xlab = "stop codon")
+boxplot(stopcodonConservationHighlyExpressed, main = "stop conservation in highly expressed", ylab = "rate", xlab = "stop codon")
 x0s <- 1:3 - 0.4
 x1s <- 1:3 + 0.4
 y0s <- c(tagConservation, taaConservation, tgaConservation)

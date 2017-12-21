@@ -24,6 +24,7 @@ def parseCds(filename):
 	stopCodons = dict()
 
 	for rec in cds:
+		rec.id = rec.id.split(".")[0]
 		stopCodons[rec.id] = str(rec.seq[-3:])
 
 	return stopCodons
@@ -56,10 +57,11 @@ def writeOutput(outfile, orthologs, stopCodonsOrt1, stopCodonsOrt2):
 	# print(stopCodonsOrt2)
 
 	out = open(outfile, "w")
-
 	for ortholog in orthologs:
-		out.write("{}\t{}\t{}\t{}\n".format(ortholog.id1, ortholog.id2, stopCodonsOrt1[ortholog.id1], stopCodonsOrt2[ortholog.id2]))
-
+		try:
+			out.write("{}\t{}\t{}\t{}\n".format(ortholog.id1, ortholog.id2, stopCodonsOrt1[ortholog.id1], stopCodonsOrt2[ortholog.id2]))
+		except KeyError:
+			print("{} not found in CDS, continuing".format(ortholog.id2))
 	out.close()
 
 def main():
