@@ -106,10 +106,48 @@ human_chickenList <- calculateHighlyExpressedStops(one2oneOrthologs_human_chicke
 human_dolphinList <- calculateHighlyExpressedStops(one2oneOrthologs_human_dolphin)
 human_mouseList   <- calculateHighlyExpressedStops(one2oneOrthologs_human_mouse)
 
-
-
-
 as.data.frame(human_mouseList[4]) - as.data.frame(human_mouseList[2])
 as.data.frame(human_dolphinList[2]) - as.data.frame(human_dolphinList[4])
 as.data.frame(human_chickenList[2]) - as.data.frame(human_chickenList[4])
 as.data.frame(human_garList[2]) - as.data.frame(human_garList[4])
+
+human_gar_taa     <- one2oneOrthologs_human_gar[one2oneOrthologs_human_gar$humanStop == "TAA" & one2oneOrthologs_human_gar$orthologStop == "TAA", 1]
+human_chicken_taa <- one2oneOrthologs_human_chicken[one2oneOrthologs_human_chicken$humanStop == "TAA" & one2oneOrthologs_human_chicken$orthologStop == "TAA", 1]
+human_mouse_taa   <- one2oneOrthologs_human_mouse[one2oneOrthologs_human_mouse$humanStop == "TAA" & one2oneOrthologs_human_mouse$orthologStop == "TAA", 1]
+human_dolphin_taa <- one2oneOrthologs_human_dolphin[one2oneOrthologs_human_dolphin$humanStop == "TAA" & one2oneOrthologs_human_dolphin$orthologStop == "TAA", 1]
+
+test1 <- c("aaa", "bbb", "ccc", "ddd")
+test2 <- c("bbb", "ddd", "eee", "fff")
+
+conserved_taa <- Reduce(intersect, list(human_gar_taa, human_chicken_taa, human_mouse_taa, human_dolphin_taa))
+for (file in expressionFiles){
+  print(file)
+  expressionTable <- read.csv(file, sep = ",", header = TRUE, stringsAsFactors = FALSE)
+  expressionTable$Gencode.Id <- apply(expressionTable, 1, function(x) strsplit(x[1], "\\.")[[1]][1])
+  print(intersect(expressionTable$Gencode.Id, conserved_taa))
+  
+
+}
+
+humango <- read.csv("~/data/stopCodons/goTermsHumanList.tsv", sep = "\t", header = FALSE, stringsAsFactors = FALSE)
+humango[which(humango$V1 %in% as.factor(conserved_taa)),]
+library("topGO")
+geneIDTOGO <- readMappings(file = "/home/dylan/data/stopCodons/goTermsHumanList.tsv", sep = "\t", IDsep = ",")
+geneNames <- names(geneIDTOGO)
+geneList <- factor(as.integer(geneNames %in% conserved_taa))
+names(geneList) <- geneNames
+str(geneList)
+
+GOdata <- new("topGOdata", ontology = "MF", allGenes = geneList, annot = annFUN.gene2GO, gene2GO = geneIDTOGO)
+
+genes(GOdata)
+geneScore(GOdata, whichGenes = conserved_taa)
+sigGenes(GOdata)
+graph(GOdata)
+usedGO(GOdata)
+termStat(GOdata)
+
+test.stat <- new("classicCount", testStatistic = GOFisherTest, name = "Fisher test")
+resultFisher <- getSigGroups(GOdata, test.stat)
+
+allRes <- GenTable(sigGenes(GOdata), classic = resultFisher, orderBy = "weight", ranksOf = "classic", topNodes = 20)
