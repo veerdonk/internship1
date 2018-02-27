@@ -1,0 +1,53 @@
+Organism,Group,Age,Full Name,Reference
+bam,Whale,200,Bowhead whale,yes
+phm,Whale,70,Sperm whale,no
+oro,Whale,30,Killer whale,no
+bacu,Whale,25,Minke whale,no
+tut,Whale,40,Bottlenose dolphin,no
+cau,Birds,40,Turkey Vulture,yes
+pcr,Birds,35,Dalmation pelican,no
+tal,Birds,34,Barn owl,no
+hle,Birds,30,Bald eagle,no
+gga,Birds,30,Cicken,no
+afo,Birds,30,Emperor penguin,no
+apla,Birds,29,Mallard,no
+ehe,Birds,15,Sunbittern,no
+mgp,Birds,13,Turkey,no
+cca,Birds,13,Common cuckoo,no
+pad,Birds,10,Adelie Penguin,no
+fab,Birds,10,Collared flycatcher,no
+aan,Birds,8.5,Anna’s Hummingbird,no
+has,Primates,80,Human,yes
+ggo,Primates,50,Western Gorilla,no
+pan,Primates,45,Olive Baboon,no
+mmu,Primates,30,Rhesus macaque,no
+tsy,Primates,24,Phillipine tarsier,no
+soe,Primates,20,Squirrel monkey,no
+csa,Primates,12,Green monkey,no
+hgl,Rodents,30,Naked mole-rat (m),yes
+can,Rodents,24,American Beaver,no
+fda,Rodents,20,Damara mole-rat,no
+cla,Rodents,17,Long-tailed chinchilla,no
+ode,Rodents,14,Degu,no
+dor,Rodents,10,Ord’s kangaroo mouse,no
+pem,Rodents,8,Northern american deer mouse,no
+cap,Rodents,6,Brazilian Guinea pig,no
+sto,Rodents,5,Thirteen-lined ground squirrel,no
+mau,Rodents,4,Golden hamster,no
+rno,Rodents,4,Rat,no
+mus,Rodents,3,Mouse,no
+mph,Rodents,2,Shrew mouse,no
+loc,Fish,18,Spotted gar,yes
+icu,Fish,17,Channel catfish,no
+omy,Fish,11,Rainbow trout,no
+oni,Fish,11,Nile tilapia,no
+ola,Fish,5,Japanese medaka,no
+xma,Fish,3,Southern platyfish,no
+amx,Fish,5,Mexican tetra (cave fish),no
+pfo,Fish,2,Amazon molly,no
+nfu,Fish,0.5,African Turquoise killifish,no
+myb,Bats,40,Brandt’s bat,yes
+myd,Bats,35,David’s myotis,no
+pale,Bats,19.5,Black flying fox,no
+efu,Bats,19,Big brown bat,no
+min,Bats,13,Natal long-fingered bat,no

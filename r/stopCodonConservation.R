@@ -1,7 +1,11 @@
 setwd("~/Documents/david/scripts_git/out/stops")
 
-
-
+## Long lived 
+longLivedStops <- read.delim("./allLongLivedWithStops.tsv", header = FALSE, stringsAsFactors = FALSE)
+longLivedStops_filtered <- longLivedStops[longLivedStops$V2 %in% c("TAA", "TGA", "TAG"),]
+sum(longLivedStops_filtered$V2 == "TAA")/length(longLivedStops_filtered$V2)
+sum(longLivedStops_filtered$V2 == "TGA")/length(longLivedStops_filtered$V2)
+sum(longLivedStops_filtered$V2 == "TAG")/length(longLivedStops_filtered$V2)
 
 ## Ortholog file and column names
 coln <- c("humanID", "orthologID", "humanStop", "orthologStop")
@@ -15,13 +19,59 @@ colnames(one2oneOrthologs_human_mouse)    <- coln
 colnames(one2oneOrthologs_human_dolphin)  <- coln
 colnames(one2oneOrthologs_human_gar)      <- coln
 
+## stop + dN/dS files
+#primates
+csa_dnds_stop <- read.csv("./primates/csa.csv", header = FALSE, stringsAsFactors = FALSE)
+ggo_dnds_stop <- read.csv("./primates/ggo.csv", header = FALSE, stringsAsFactors = FALSE)
+mmu_dnds_stop <- read.csv("./primates/mmu.csv", header = FALSE, stringsAsFactors = FALSE)
+pan_dnds_stop <- read.csv("./primates/pan.csv", header = FALSE, stringsAsFactors = FALSE)
+soe_dnds_stop <- read.csv("./primates/soe.csv", header = FALSE, stringsAsFactors = FALSE)
+tsy_dnds_stop <- read.csv("./primates/tsy.csv", header = FALSE, stringsAsFactors = FALSE)
+primate_dnds_files <- list(csa_dnds_stop, ggo_dnds_stop, mmu_dnds_stop, pan_dnds_stop, soe_dnds_stop, tsy_dnds_stop)
+
+#rodents
+rodents_dir <- dir("./rodents/", full.names = TRUE)
+for(filename in rodents_dir){
+  rodent <- read.csv(filename, header = FALSE, stringsAsFactors = FALSE)
+  filterdnds(rodent)
+}
+
+
+## Filter/plot dnds files
+filterdnds <- function(x){
+  filteredDnds <- x[x$V5 > 0 & x$V6 > 0.01 & x$V5 < 2 & x$V6 < 2 & x$V4 < 10 & x$V4 < 1 & x$V7 %in% stops,]
+  
+  # allTGA = c(allTGA, filteredDnds$V4[filteredDnds$V7 == "TGA"])
+  # allTAA = c(allTAA, filteredDnds$V4[filteredDnds$V7 == "TAA"])
+  # allTAG = c(allTAG, filteredDnds$V4[filteredDnds$V7 == "TAG"])
+  boxplot(log(filteredDnds$V4) ~ filteredDnds$V7, data = filteredDnds, main = titles[which(files == file)])
+}
+
+for(primate in primate_dnds_files){
+  filterdnds(as.data.frame(primate))
+}
+
+
 ## Expression files and their names
 expressionFiles <- dir("~/data/expression/", full.names = TRUE)
 expressionNames <- c("adipose", "adrenalGland", "artery", "blood", "brainCortex", "brainHippocampus", "colon", "esophagus", "heart", "liver", "lung", "nerve", "ovary", "pancreas", "prostate", "skeletalMuscle", "smallIntestine", "spleen", "testis", "thyroid", "uterus", "vagina")
 
 ## Legal stopcodons
 stopCodons <- as.factor(c("TAG", "TAA", "TGA"))
-orthologsFiltered <- one2oneOrthologs[one2oneOrthologs$humanStop %in% stopCodons & one2oneOrthologs$orthologStop %in% stopCodons,]
+one2oneOrthologs_human_chicken <- one2oneOrthologs_human_chicken[one2oneOrthologs_human_chicken$humanStop %in% stopCodons & one2oneOrthologs_human_chicken$orthologStop %in% stopCodons,]
+one2oneOrthologs_human_dolphin <- one2oneOrthologs_human_dolphin[one2oneOrthologs_human_dolphin$humanStop %in% stopCodons & one2oneOrthologs_human_dolphin$orthologStop %in% stopCodons,]
+one2oneOrthologs_human_gar     <- one2oneOrthologs_human_gar[one2oneOrthologs_human_gar$humanStop %in% stopCodons & one2oneOrthologs_human_gar$orthologStop %in% stopCodons,]
+one2oneOrthologs_human_mouse   <- one2oneOrthologs_human_mouse[one2oneOrthologs_human_mouse$humanStop %in% stopCodons & one2oneOrthologs_human_mouse$orthologStop %in% stopCodons,]
+
+
+## Stop codon distribution
+getCodonFreqOneSpecies <- function(x){
+  TAG <- length(x[x$orthologStop == "TAG",1])/length(x$orthologStop)
+  TGA <- length(x[x$orthologStop == "TGA",1])/length(x$orthologStop)
+  TAA <- length(x[x$orthologStop == "TAA",1])/length(x$orthologStop)
+  return(c(TAG, TAA, TGA))
+}
+
 
 #human TGA == ortholog TGA ratio
 tgaConservation <- sum(orthologsFiltered$humanStop == "TGA" & orthologsFiltered$orthologStop == "TGA")/sum(orthologsFiltered$humanStop == "TGA")
@@ -44,7 +94,6 @@ getCodonFreq <- function(x){
 
 # Stopcodon frequency in all ortholog genes
 stopFrequency <- getCodonFreq(orthologsFiltered)
-
 
 
 calculateHighlyExpressedStops <- function(x){
@@ -98,7 +147,7 @@ calculateHighlyExpressedStops <- function(x){
   }
   return(list(stopcodonConservationHighlyExpressed, round(stopcodonTrans/length(stopcodonConservationHighlyExpressed$TAG),2), totals, stopFrequency))
 }
-# highlyExpressedStops <- round(stopcodonTrans/length(stopcodonConservationHighlyExpressed$TAG),2)
+highlyExpressedStops <- round(stopcodonTrans/length(stopcodonConservationHighlyExpressed$TAG),2)
 
 
 human_garList     <- calculateHighlyExpressedStops(one2oneOrthologs_human_gar)
@@ -106,7 +155,7 @@ human_chickenList <- calculateHighlyExpressedStops(one2oneOrthologs_human_chicke
 human_dolphinList <- calculateHighlyExpressedStops(one2oneOrthologs_human_dolphin)
 human_mouseList   <- calculateHighlyExpressedStops(one2oneOrthologs_human_mouse)
 
-as.data.frame(human_mouseList[4]) - as.data.frame(human_mouseList[2])
+as.data.frame(human_mouseList[2]) - as.data.frame(human_mouseList[4])
 as.data.frame(human_dolphinList[2]) - as.data.frame(human_dolphinList[4])
 as.data.frame(human_chickenList[2]) - as.data.frame(human_chickenList[4])
 as.data.frame(human_garList[2]) - as.data.frame(human_garList[4])
@@ -116,38 +165,44 @@ human_chicken_taa <- one2oneOrthologs_human_chicken[one2oneOrthologs_human_chick
 human_mouse_taa   <- one2oneOrthologs_human_mouse[one2oneOrthologs_human_mouse$humanStop == "TAA" & one2oneOrthologs_human_mouse$orthologStop == "TAA", 1]
 human_dolphin_taa <- one2oneOrthologs_human_dolphin[one2oneOrthologs_human_dolphin$humanStop == "TAA" & one2oneOrthologs_human_dolphin$orthologStop == "TAA", 1]
 
+geneUniverseTaa <- unique(c(human_chicken_taa, human_gar_taa, human_dolphin_taa, human_mouse_taa))
+geneUniverseAll <- unique(c(one2oneOrthologs_human_chicken$humanID, one2oneOrthologs_human_dolphin$humanID, one2oneOrthologs_human_gar$humanID, one2oneOrthologs_human_mouse$humanID))
+
+calculateIntersectForStop <- function(stop){
+  intersection = Reduce(intersect, list(
+  one2oneOrthologs_human_chicken[one2oneOrthologs_human_chicken$humanStop == stop & one2oneOrthologs_human_chicken$orthologStop == stop, 1],
+  one2oneOrthologs_human_dolphin[one2oneOrthologs_human_dolphin$humanStop == stop & one2oneOrthologs_human_dolphin$orthologStop == stop, 1],
+  one2oneOrthologs_human_gar[one2oneOrthologs_human_gar$humanStop == stop & one2oneOrthologs_human_gar$orthologStop == stop, 1],
+  one2oneOrthologs_human_mouse[one2oneOrthologs_human_mouse$humanStop == stop & one2oneOrthologs_human_mouse$orthologStop == stop, 1]
+  ))
+  return(intersection)
+}
+
+nonConserved = Reduce(intersect, list(
+  one2oneOrthologs_human_chicken[one2oneOrthologs_human_chicken$humanStop != one2oneOrthologs_human_chicken$orthologStop,1],
+  one2oneOrthologs_human_dolphin[one2oneOrthologs_human_dolphin$humanStop != one2oneOrthologs_human_dolphin$orthologStop,1],
+  one2oneOrthologs_human_gar[one2oneOrthologs_human_gar$humanStop != one2oneOrthologs_human_gar$orthologStop,1],
+  one2oneOrthologs_human_mouse[one2oneOrthologs_human_mouse$humanStop != one2oneOrthologs_human_mouse$orthologStop,1]
+))
+# write.csv(nonConserved, file = "~/data/stopCodons/goTerms/nonConserved.csv", row.names = F)
+
+conservedTga <- calculateIntersectForStop("TGA")
+# write.csv(conservedTga, file = "~/data/stopCodons/goTerms/conservedTga.csv", row.names = F)
+conservedTag <- calculateIntersectForStop("TAG")
+# write.csv(conservedTag, file = "~/data/stopCodons/goTerms/conservedTag.csv", row.names = F)
+
+# sum(geneUniverseAll %in% conserved_taa)
+
+# write.csv(geneUniverseAll, file = "~/data/stopCodons/goTerms/allGenes.csv", row.names = F)
+
 test1 <- c("aaa", "bbb", "ccc", "ddd")
 test2 <- c("bbb", "ddd", "eee", "fff")
 
 conserved_taa <- Reduce(intersect, list(human_gar_taa, human_chicken_taa, human_mouse_taa, human_dolphin_taa))
+# write.csv(conserved_taa, file = "~/data/stopCodons/goTerms/conserved_taa.csv", row.names = F)
 for (file in expressionFiles){
   print(file)
   expressionTable <- read.csv(file, sep = ",", header = TRUE, stringsAsFactors = FALSE)
   expressionTable$Gencode.Id <- apply(expressionTable, 1, function(x) strsplit(x[1], "\\.")[[1]][1])
   print(intersect(expressionTable$Gencode.Id, conserved_taa))
-  
-
 }
-
-humango <- read.csv("~/data/stopCodons/goTermsHumanList.tsv", sep = "\t", header = FALSE, stringsAsFactors = FALSE)
-humango[which(humango$V1 %in% as.factor(conserved_taa)),]
-library("topGO")
-geneIDTOGO <- readMappings(file = "/home/dylan/data/stopCodons/goTermsHumanList.tsv", sep = "\t", IDsep = ",")
-geneNames <- names(geneIDTOGO)
-geneList <- factor(as.integer(geneNames %in% conserved_taa))
-names(geneList) <- geneNames
-str(geneList)
-
-GOdata <- new("topGOdata", ontology = "MF", allGenes = geneList, annot = annFUN.gene2GO, gene2GO = geneIDTOGO)
-
-genes(GOdata)
-geneScore(GOdata, whichGenes = conserved_taa)
-sigGenes(GOdata)
-graph(GOdata)
-usedGO(GOdata)
-termStat(GOdata)
-
-test.stat <- new("classicCount", testStatistic = GOFisherTest, name = "Fisher test")
-resultFisher <- getSigGroups(GOdata, test.stat)
-
-allRes <- GenTable(sigGenes(GOdata), classic = resultFisher, orderBy = "weight", ranksOf = "classic", topNodes = 20)

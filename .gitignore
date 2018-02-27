@@ -9,3 +9,5 @@ resultPrep/__pycache__/*
 stopcodons/__pycache__/
 stopcodons/__pycache__/*
 stopcodons/test.tsv
+r/model/results/*
+r/model/results

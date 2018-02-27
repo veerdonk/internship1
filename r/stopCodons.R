@@ -17,6 +17,10 @@ boxplot(filteredDnds$V4 ~ filteredDnds$V7, data = filteredDnds, log = "y")
 
 # pdf("stopCodonSelection.pdf")
 
+allTGA = c()
+allTAA = c()
+allTAG = c()
+
 
 for (file in files){
   prim <- read.csv(file, header = FALSE, stringsAsFactors = FALSE)
@@ -30,11 +34,14 @@ for (file in files){
   print(summary(dnds.aov))
   # plot(dnds.aov, 2)
   print(count(filteredDnds$V7))
-  
+  allTGA = c(allTGA, filteredDnds$V4[filteredDnds$V7 == "TGA"])
+  allTAA = c(allTAA, filteredDnds$V4[filteredDnds$V7 == "TAA"])
+  allTAG = c(allTAG, filteredDnds$V4[filteredDnds$V7 == "TAG"])
   boxplot(log(filteredDnds$V4) ~ filteredDnds$V7, data = filteredDnds, main = titles[which(files == file)])
 }
 # dev.off()
-
+allStopsDnds = data.frame(allTAA)
+boxplot(list(log(allTAA), log(allTGA), log(allTAG)), names = c("TAA", "TGA", "TAG"), main = "Stop codon dNdS (rodents)", ylab = "log(dNdS)", xlab = "stop codon")
 
 test <- PlantGrowth
 pairwise.t.test(filteredDnds$V4, filteredDnds$V7, p.adjust.method = "BH")
